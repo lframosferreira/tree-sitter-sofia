@@ -1,1 +1,3 @@
-let int x = 1;
+func bool is_odd(bool x){
+    return True;
+}

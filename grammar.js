@@ -11,35 +11,31 @@ module.exports = grammar({
   name: "sofia",
 
   rules: {
-    source_file: ($) => repeat($._declaration),
+    source_file: ($) => repeat(choice($._declaration, $._statement)),
 
     _declaration: ($) => choice($.function_declaration, $.variable_declaration),
 
     function_declaration: ($) =>
-      seq("func", $._type, $.identifier, $.parameter_list, $.block),
+      seq("func", $._type, $._identifier, $._parameter_list, $._block),
 
     variable_declaration: ($) =>
-      seq("let", $._type, $.identifier, "=", $._expression, ";"),
+      seq("let", $._type, $._identifier, "=", $._expression, ";"),
 
-    parameter_list: ($) =>
-      seq(
-        "(",
-        // TODO: parameters
-        ")",
-      ),
+    _parameter_list: ($) =>
+      seq("(", seq($._type, $._identifier), ")"),
 
-    _type: ($) => choice("bool", "int", "float", "string", "list"),
+    _type: (_) => choice("bool", "int", "float", "string", "list"),
 
-    block: ($) => seq("{", repeat($._statement), "}"),
+    _block: ($) => seq("{", repeat($._statement), "}"),
 
-    _statement: ($) => choice($.return_statement),
+    _statement: ($) => choice($._return_statement),
 
-    return_statement: ($) => seq("return", $._expression, ";"),
+    _return_statement: ($) => seq("return", $._expression, ";"),
 
-    _expression: ($) => choice($.identifier, $.literal),
+    _expression: ($) => choice($._identifier, $._literal),
 
-    identifier: ($) => /[a-zA-Z_][a-zA-Z0-9_]*/,
+    _identifier: (_) => /[a-zA-Z_][a-zA-Z0-9_]*/,
 
-    literal: ($) => choice(/\d+/, /\d+\.\d+/, "True", "False"),
+    _literal: ($) => choice(/\d+/, /\d+\.\d+/, alias("True", $.boolean), alias("False", $.boolean)),
   },
 });
